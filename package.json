@@ -1,0 +1,54 @@
+{
+  "name": "lcu-dao-transactions",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist-node/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/corbifex/lisk-transaction-boilerplate.git"
+  },
+  "author": "Corbifex <info@corbifex.com>",
+  "license": "GPL-3.0",
+  "scripts": {
+    "test": "jest --coverage --verbose",
+    "test:ci": "jest --config ./jest.config.js",
+    "prebuild": "rm -r dist-node | rm tsconfig.tsbuildinfo | mkdir dist-node | true",
+    "build": "tsc",
+    "build:check": "node -e \"require('./dist-node')\""
+  },
+  "dependencies": {
+    "@liskhq/lisk-chain": "^0.1.0-alpha.0",
+    "@liskhq/lisk-cryptography": "^2.5.0-alpha.0",
+    "@liskhq/lisk-transactions": "^4.0.0-alpha.0",
+    "@liskhq/lisk-validator": "^0.4.0-alpha.0",
+    "lisk-sdk": "^4.0.0-alpha.0",
+    "ripemd160": "^2.0.2",
+    "tslib": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@types/jest-when": "^2.7.1",
+    "@types/node": "^13.7.1",
+    "codecov": "^3.6.5",
+    "jest": "^25.5.1",
+    "jest-extended": "^0.11.5",
+    "jest-junit": "^10.0.0",
+    "jest-when": "^2.7.1",
+    "ts-jest": "^25.4.0",
+    "ts-node": "^8.9.1",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^3.8.3"
+  },
+  "bugs": {
+    "url": "https://github.com/corbifex/lisk-transaction-boilerplate/issues"
+  },
+  "homepage": "https://github.com/moosty/lisk-transaction-boilerplate#readme",
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "lisk",
+    "custom transaction",
+    "boilerplate"
+  ]
+}
