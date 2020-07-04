@@ -6,16 +6,17 @@ import {
     StateStorePrepare,
     TransactionError,
     convertToAssetError,
+    TransactionJSON,
 } from '@liskhq/lisk-transactions';
 
-import {TRANSACTION_TYPE} from './constants';
+import {ADDRESBOOK_TYPE} from './constants';
 import {TransactionAssetSchema} from './schemas';
 import {AddressBookTXAsset, AddressBookTXInterface} from './interfaces';
-import { assetBytesToPublicKey } from './utils';
+import {assetBytesToPublicKey} from './utils';
 
 export class CreateAddressBook extends BaseTransaction {
     readonly asset: AddressBookTXAsset;
-    public readonly TYPE = TRANSACTION_TYPE;
+    public static TYPE = ADDRESBOOK_TYPE;
 
     public constructor(rawTransaction: unknown) {
         super(rawTransaction);
@@ -66,8 +67,13 @@ export class CreateAddressBook extends BaseTransaction {
             Buffer.concat(this.asset.addresses.map(address => stringToBuffer(address))) :
             Buffer.alloc(0);
 
+        const descriptionBuffer = this.asset.description
+            ? stringToBuffer(this.asset.description)
+            : Buffer.alloc(0);
+
         return Buffer.concat([
             nameBuffer,
+            descriptionBuffer,
             addressesBuffer,
         ]);
     }
@@ -83,14 +89,35 @@ export class CreateAddressBook extends BaseTransaction {
             },
             {
                 address: getAddressFromPublicKey(this.getAddressBookPublicKey()),
-            }
+            },
         ]);
+    }
+
+    protected verifyAgainstTransactions(
+        transactions: ReadonlyArray<TransactionJSON>,
+    ): ReadonlyArray<TransactionError> {
+        return transactions
+            .filter(
+                tx =>
+                    // @ts-ignore
+                    tx.type === this.type && tx.asset.name === this.asset.name,
+            )
+            .map(
+                tx =>
+                    new TransactionError(
+                        'Address book name already exist.',
+                        tx.id,
+                        '.asset.name',
+                        this.asset.name,
+                    ),
+            );
     }
 
     protected async applyAsset(store: StateStore): Promise<ReadonlyArray<TransactionError>> {
         const errors: TransactionError[] = [];
         const addressBook = await store.account.getOrDefault(getAddressFromPublicKey(this.getAddressBookPublicKey()));
-        if (addressBook.balance > BigInt(0) || addressBook.publicKey !== this.getAddressBookPublicKey() || Object.keys(addressBook.asset).length > 0) {
+
+        if (addressBook.balance > BigInt(0) || Object.keys(addressBook.asset).length > 0) {
             errors.push(
                 new TransactionError(
                     '`addressBookPublicKey` already exists.',
@@ -101,12 +128,14 @@ export class CreateAddressBook extends BaseTransaction {
             );
         }
 
-        // TODO : lookup name error
-
+        addressBook.publicKey = this.getAddressBookPublicKey();
         addressBook.asset = {
+            type: "ADDRESSBOOK",
             name: this.asset.name,
-            addresses: this.asset.addresses,
-        } ;
+            addresses: [this.senderPublicKey.toString(), ...this.asset.addresses],
+            description: this.asset.description,
+            nonce: 0,
+        };
 
         store.account.set(addressBook.address, addressBook);
         return errors;

@@ -1,6 +1,7 @@
 import { CreateAddressBook } from './addressbook';
 import { BaseVote } from "./baseVote";
 import { BaseProposal } from "./baseProposal";
+import { JoinTransaction } from "./joinTransaction";
 import { SimpleProposal, AddMemberProposal } from "./proposals";
 import { AddMemberVote, SimpleVote } from "./votes";
 import * as Schemas from './schemas';
@@ -20,4 +21,5 @@ export {
     AddMemberVote,
     SimpleProposal,
     AddMemberProposal,
+    JoinTransaction,
 }

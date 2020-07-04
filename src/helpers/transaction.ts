@@ -6,7 +6,7 @@ import {
 } from '@liskhq/lisk-validator';
 import { constants, TransactionJSON } from '@liskhq/lisk-transactions';
 import { createBaseTransaction } from '@liskhq/lisk-transactions/dist-node/utils'
-import { Transaction } from '../transaction';
+import { CreateAddressBook } from '../addressbook';
 const { BYTESIZES } = constants;
 
 export interface Inputs {
@@ -100,7 +100,7 @@ export const transaction = (inputs: Inputs): Partial<TransactionJSON> => {
         },
     };
 
-    const transactionTransaction = new Transaction(
+    const transactionTransaction = new CreateAddressBook(
         transactionWithSenderInfo,
     );
 

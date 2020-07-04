@@ -1,6 +1,6 @@
 export const TransactionAssetSchema = {
     type: 'object',
-    required: ['name', 'addresses'],
+    required: ['name', 'description', 'addresses'],
     properties: {
         name: {
             type: 'string',
@@ -57,6 +57,21 @@ export const BaseVoteAssetSchema = {
         vote: {
             type: 'integer',
             minimum: 0,
+        }
+    }
+}
+
+export const JoinAssetSchema = {
+    type: 'object',
+    required: ['addressBook', 'proposal'],
+    properties: {
+        addressBook: {
+            type: 'string',
+            format: 'publicKey',
+        },
+        proposal: {
+            type: 'string',
+            format: 'publicKey',
         }
     }
 }

@@ -1,12 +1,11 @@
 import {TransactionError, StateStore} from '@liskhq/lisk-transactions';
-import {getAddressFromPublicKey} from '@liskhq/lisk-cryptography';
 
 import {BaseProposal} from '../baseProposal';
 import {SIMPLE_PROPOSAL_TYPE} from '../constants';
 import {ApplyProposal, SimpleProposalTXAsset, SimpleProposalTXInterface, ProposalAccount} from "../interfaces";
 
 export class SimpleProposal extends BaseProposal {
-    public readonly TYPE = SIMPLE_PROPOSAL_TYPE;
+    public static TYPE = SIMPLE_PROPOSAL_TYPE;
 
     constructor(rawTransaction: unknown) {
         super(rawTransaction);

@@ -10,9 +10,11 @@ import {
 import {BaseProposalAssetSchema} from './schemas';
 import {BaseProposalTXInterface, BaseProposalTXAsset, AddressBookAccount, ProposalAccount, ApplyProposal} from './interfaces';
 import {assetBytesToPublicKey} from './utils';
+import {BASE_PROPOSAL_TYPE} from "./constants";
 
 export class BaseProposal extends BaseTransaction {
     public asset: any;
+    public static TYPE = BASE_PROPOSAL_TYPE;
 
     public constructor(rawTransaction: unknown) {
         super(rawTransaction);
@@ -75,6 +77,9 @@ export class BaseProposal extends BaseTransaction {
             },
             {
                 address: this.getProposalAddress(),
+            },
+            {
+                address: getAddressFromPublicKey(this.asset.addressBook)
             }
         ]);
     }
@@ -82,17 +87,18 @@ export class BaseProposal extends BaseTransaction {
     public async applyProposalAsset(store: StateStore): Promise<ApplyProposal> {
         const errors: TransactionError[] = [];
         const proposal = await store.account.getOrDefault(this.getProposalAddress()) as ProposalAccount;
-
         return { proposal, errors };
     }
 
     protected async applyAsset(store: StateStore): Promise<ReadonlyArray<TransactionError>> {
         const errs: TransactionError[] = [];
         const addressBook = await store.account.getOrDefault(getAddressFromPublicKey(this.asset.addressBook)) as AddressBookAccount;
-        if (addressBook.balance > BigInt(0) || addressBook.publicKey !== this.getProposalPublicKey() || Object.keys(addressBook.asset).length > 0) {
+        const storedProposal = await store.account.getOrDefault(this.getProposalAddress()) as ProposalAccount;
+
+        if (storedProposal.balance > BigInt(0) || storedProposal.asset.nonce > -1) {
             errs.push(
                 new TransactionError(
-                    '`addressBookPublicKey` already exists.',
+                    '`.proposal` already exists.',
                     this.id,
                     '.publicKey',
                     this.getProposalPublicKey(),
@@ -111,8 +117,8 @@ export class BaseProposal extends BaseTransaction {
                 ),
             );
         }
-
-        const isValidMember = addressBook.asset.members.find(member => member.publicKey === this.senderPublicKey && !member.out);
+        //todo fix member list :P
+        const isValidMember = addressBook.asset.addresses.find(member => member === this.senderPublicKey);
         if (!isValidMember) {
             errs.push(
                 new TransactionError(
@@ -130,6 +136,7 @@ export class BaseProposal extends BaseTransaction {
             errs.push(err);
         });
 
+        proposal.publicKey = this.getProposalPublicKey();
         proposal.asset = {
             ...proposal.asset,
             options: proposal.asset.options || {},
@@ -138,8 +145,7 @@ export class BaseProposal extends BaseTransaction {
             addressBook: this.asset.addressBook,
             nonce: addressBook.asset.nonce,
             start: store.chain.lastBlockHeader.timestamp,
-            // @ts-ignore
-            type: this.TYPE,
+            type: "ADD_MEMBER",
         }
 
         addressBook.asset = {
@@ -160,7 +166,7 @@ export class BaseProposal extends BaseTransaction {
         proposal.asset = {
             options: {},
             votes: [],
-            type: -1,
+            type: "",
             status: -1,
             addressBook: this.asset.addressBook,
             nonce: -1,

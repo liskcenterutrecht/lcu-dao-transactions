@@ -8,7 +8,7 @@ export interface ProposalAccountAsset {
     readonly addressBook: string;
     readonly start: number;
     readonly votes: Array<Vote>;
-    readonly type: number;
+    readonly type: string;
     readonly status: number;
     readonly options: object;
     readonly nonce: number;
@@ -24,16 +24,10 @@ export interface AddressBookAccount extends Account {
 }
 
 export interface AddressBookAccountAsset {
-    readonly members: Array<Member>; // allowed members
+    readonly addresses: Array<string>; // allowed members
     readonly nonce: number;
     readonly name: string;
     readonly description: string;
-}
-
-export interface Member {
-    readonly publicKey: string;
-    readonly nonce: number;
-    readonly out?: boolean;
 }
 
 export interface AddressBookTXInterface extends TransactionJSON {
@@ -54,6 +48,10 @@ export interface AddMemberProposalTXInterface extends TransactionJSON {
 
 export interface BaseVoteTXInterface extends TransactionJSON {
     readonly asset: BaseVoteTXAsset;
+}
+
+export interface JoinTXInterface extends TransactionJSON {
+    readonly asset: JoinTXAsset;
 }
 
 export interface AddressBookTXAsset {
@@ -88,6 +86,11 @@ export interface BaseVoteTXAsset {
     readonly addressBook: string;
     readonly proposal: string;
     readonly vote: number;
+}
+
+export interface JoinTXAsset {
+    readonly addressBook: string;
+    readonly proposal: string;
 }
 
 export interface TransactionJSON {

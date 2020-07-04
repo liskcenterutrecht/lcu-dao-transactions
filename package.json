@@ -1,6 +1,6 @@
 {
   "name": "lcu-dao-transactions",
-  "version": "0.0.1",
+  "version": "0.0.1c",
   "description": "",
   "main": "dist-node/index.js",
   "repository": {

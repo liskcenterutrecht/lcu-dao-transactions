@@ -12,7 +12,7 @@ import {
 } from "../interfaces";
 
 export class AddMemberProposal extends BaseProposal {
-    public readonly TYPE = ADD_MEMBER_PROPOSAL_TYPE;
+    public static TYPE = ADD_MEMBER_PROPOSAL_TYPE;
 
     constructor(rawTransaction: unknown) {
         super(rawTransaction);
@@ -42,6 +42,9 @@ export class AddMemberProposal extends BaseProposal {
             },
             {
                 address: getAddressFromPublicKey(this.asset.options.member),
+            },
+            {
+                address: getAddressFromPublicKey(this.asset.addressBook),
             }
         ]);
     }
@@ -49,7 +52,7 @@ export class AddMemberProposal extends BaseProposal {
     public async applyProposalAsset(store: StateStore): Promise<ApplyProposal> {
         const errors: TransactionError[] = [];
         const proposal = await store.account.getOrDefault(this.getProposalAddress()) as ProposalAccount;
-        const addressBook = await store.account.getOrDefault(this.asset.addressBook) as AddressBookAccount;
+        const addressBook = await store.account.getOrDefault(getAddressFromPublicKey(this.asset.addressBook)) as AddressBookAccount;
         const proposedMember = await store.account.getOrDefault(getAddressFromPublicKey(this.asset.options.member)) as Account;
 
         if (!this.asset.options.member) {
@@ -63,7 +66,7 @@ export class AddMemberProposal extends BaseProposal {
             );
         }
 
-        if (addressBook.asset.members.find(m => m.publicKey === this.asset.options.member)) {
+        if (addressBook.asset.addresses.find(m => m === this.asset.options.member)) {
             errors.push(
                 new TransactionError(
                     '`.asset.options.member` already is in this address book.',
