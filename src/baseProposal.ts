@@ -98,7 +98,7 @@ export class BaseProposal extends BaseTransaction {
         if (storedProposal.balance > BigInt(0) || storedProposal.asset.nonce > -1) {
             errs.push(
                 new TransactionError(
-                    '`.proposal` already exists.',
+                    'This proposal already exists.',
                     this.id,
                     '.publicKey',
                     this.getProposalPublicKey(),
@@ -109,7 +109,7 @@ export class BaseProposal extends BaseTransaction {
         if (this.asset.nonce !== addressBook.asset.nonce) {
             errs.push(
                 new TransactionError(
-                    '`.asset.nonce` wrong proposal nonce.',
+                    'Wrong proposal nonce.',
                     this.id,
                     '.asset.nonce',
                     this.asset.nonce,
@@ -117,12 +117,11 @@ export class BaseProposal extends BaseTransaction {
                 ),
             );
         }
-        //todo fix member list :P
-        const isValidMember = addressBook.asset.addresses.find(member => member === this.senderPublicKey);
+        const isValidMember = addressBook.asset.addresses.find(a => a.member === this.senderPublicKey);
         if (!isValidMember) {
             errs.push(
                 new TransactionError(
-                    '`.senderPublicKey` is not allowed to make a proposal for this addressBook.',
+                    'You are not allowed to make a proposal for this addressBook.',
                     this.id,
                     '.senderPublicKey',
                     this.senderPublicKey,
@@ -145,7 +144,6 @@ export class BaseProposal extends BaseTransaction {
             addressBook: this.asset.addressBook,
             nonce: addressBook.asset.nonce,
             start: store.chain.lastBlockHeader.timestamp,
-            type: "ADD_MEMBER",
         }
 
         addressBook.asset = {

@@ -24,10 +24,15 @@ export interface AddressBookAccount extends Account {
 }
 
 export interface AddressBookAccountAsset {
-    readonly addresses: Array<string>; // allowed members
+    readonly addresses: Array<Member>; // allowed members
     readonly nonce: number;
     readonly name: string;
     readonly description: string;
+}
+
+interface Member {
+    readonly member: string;
+    readonly nonce: number;
 }
 
 export interface AddressBookTXInterface extends TransactionJSON {

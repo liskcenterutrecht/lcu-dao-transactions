@@ -91,6 +91,7 @@ export class AddMemberProposal extends BaseProposal {
 
         proposal.asset = {
             ...proposal.asset,
+            type: "ADD_MEMBER",
             options: {
                 member: this.asset.options.member ? this.asset.options.member : "",
             },

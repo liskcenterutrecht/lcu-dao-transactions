@@ -9,12 +9,13 @@ import {
 } from '@liskhq/lisk-transactions';
 import {JoinAssetSchema} from './schemas';
 import {JoinTXInterface, JoinTXAsset, AddressBookAccount, ProposalAccount} from './interfaces';
-import { JOIN_TYPE } from './constants';
+import {JOIN_TYPE} from './constants';
 import {getAddressFromPublicKey} from "@liskhq/lisk-cryptography/dist-node";
 
 export class JoinTransaction extends BaseTransaction {
   readonly asset: JoinTXAsset;
   public static TYPE = JOIN_TYPE;
+
   public constructor(rawTransaction: unknown) {
     super(rawTransaction);
     const tx = (typeof rawTransaction === 'object' && rawTransaction !== null
@@ -74,12 +75,12 @@ export class JoinTransaction extends BaseTransaction {
     const addressBook = await store.account.getOrDefault(getAddressFromPublicKey(this.asset.addressBook)) as AddressBookAccount;
     const proposalValidator = await store.account.getOrDefault(getAddressFromPublicKey(this.asset.proposal)) as ProposalAccount;
 
-    const isMember = addressBook.asset.addresses.find(member => member === this.senderPublicKey);
+    const isMember = addressBook.asset.addresses.find(a => a.member === this.senderPublicKey);
 
     if (isMember) {
       errors.push(
         new TransactionError(
-          '`.senderPublicKey` is already member.',
+          'You are already a member of this DAO.',
           this.id,
           '.senderPublicKey',
           this.senderPublicKey,
@@ -87,22 +88,22 @@ export class JoinTransaction extends BaseTransaction {
       );
     }
 
-    if (proposalValidator.asset.start + (60*5) > store.chain.lastBlockHeader.timestamp + 10) {
+    if (addressBook.asset.addresses.length > proposalValidator.asset.votes.length && proposalValidator.asset.start + (60 * 60 * 24) > store.chain.lastBlockHeader.timestamp + 10) {
       errors.push(
         new TransactionError(
-          '`.asset.proposal` is not yet expired.',
+          'Voting is not yet finished.',
           this.id,
           '.timestamp',
           store.chain.lastBlockHeader.timestamp + 10,
-          `> ${proposalValidator.asset.start + (60*5)}`
+          `> ${proposalValidator.asset.start + (60 * 60 * 24)}`
         ),
       );
     }
 
-    if (proposalValidator.asset.votes.filter(v => v.vote === 1).length <= proposalValidator.asset.votes.length / 2) {
+    if (proposalValidator.asset.votes.filter(v => v.vote === 1).length < proposalValidator.asset.votes.length / 2) {
       errors.push(
         new TransactionError(
-          '`.asset.proposal` did not pass add member voting.',
+          'The voting did not pass this add member voting.',
           this.id,
           '.asset.proposal',
           this.asset.proposal
@@ -125,9 +126,9 @@ export class JoinTransaction extends BaseTransaction {
     if (proposalValidator.asset.options.member !== this.senderPublicKey) {
       errors.push(
         new TransactionError(
-          '`.senderPublicKey` is not the subject of this proposal.',
+          'You are not the subject of this proposal.',
           this.id,
-          '.senderPublicKeyl',
+          '.senderPublicKey',
           this.senderPublicKey,
           // @ts-ignore
           proposalValidator.asset.options.member
@@ -144,7 +145,7 @@ export class JoinTransaction extends BaseTransaction {
       ...addressBook.asset,
       addresses: [
         ...addressBook.asset.addresses,
-        this.senderPublicKey
+        {member: this.senderPublicKey, nonce: addressBook.asset.nonce},
       ]
     }
 
@@ -162,7 +163,7 @@ export class JoinTransaction extends BaseTransaction {
     addressBook.asset = {
       ...addressBook.asset,
       addresses: {
-        ...addressBook.asset.addresses.filter(a => a !== this.senderPublicKey),
+        ...addressBook.asset.addresses.filter(a => a.member !== this.senderPublicKey),
       }
     }
 
