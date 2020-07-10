@@ -66,7 +66,7 @@ export class AddMemberProposal extends BaseProposal {
       );
     }
 
-    if (addressBook.asset.addresses.find(m => m === this.asset.options.member)) {
+    if (addressBook.asset.addresses.find(m => m.member === this.asset.options.member)) {
       errors.push(
         new TransactionError(
           '`.asset.options.member` already is in this address book.',
