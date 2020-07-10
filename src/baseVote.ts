@@ -101,7 +101,7 @@ export class BaseVote extends BaseTransaction {
       );
     }
 
-    if (isValidMember && proposalValidator.asset.nonce > isValidMember.nonce) {
+    if (isValidMember && proposalValidator.asset.nonce < isValidMember.nonce) {
       errs.push(
         new TransactionError(
           'You are not allowed to vote on this voting, please wait for a new voting.',
